@@ -47,7 +47,7 @@ public class ClientGUI implements ClientIF, ActionListener, DocumentListener, It
 	private static final int HALF_HOUR_MARGIN = 5; //5
 	private static final int DAY = 106; //110
 	private static final int DAY_MARGIN = 24; //25
-	private static final int LIST_ROWS = 5;
+	private static final int LIST_ROWS = 12;
 	private static final int EDIT_HEIGHT = 500; //Dialog edit height.
 	
 	//GUI variables
@@ -63,7 +63,7 @@ public class ClientGUI implements ClientIF, ActionListener, DocumentListener, It
 	//Selecting the semester and the sort order with a combobox
 	JComboBox<String> cboSemester, cboSortOrder;
 	//Buttons. These are pretty telling of what actions will occur.
-	JButton btnCourseSequences, btnAdd, btnRemove, btnEdit, btnClearAll, btnIncK, btnDecK, btnGenerate, btnNext, btnPrev, btnFirst, btnLast, btnPrint, btnExport;
+	JButton btnCourseSequences, btnNew, btnDelete, btnAdd, btnRemove, btnEdit, btnClearAll, btnIncK, btnDecK, btnGenerate, btnNext, btnPrev, btnFirst, btnLast, btnPrint, btnExport;
 	//Areas to write text
 	JTextField txtSearch;
 	//To hold lists (like search results)
@@ -119,11 +119,13 @@ public class ClientGUI implements ClientIF, ActionListener, DocumentListener, It
 		btnEdit.setEnabled(false);
 		
 		//Make loading screen.
+		//TODO: Implement loading screen
+		/*
 		frmLoading = new JFrame("uOttawa Schedule Generator");
 		frmLoading.add(new JLabel("<html>Attempting to connect to server... Please wait<br><br>If this takes longer than 10 seconds,<br>the server may be down. Try again later.</html>"));
 		frmLoading.pack();
 		frmLoading.setLocationRelativeTo(null);
-		
+		*/
 		//No resizing
 		frame.setResizable(false);
 		
@@ -134,11 +136,12 @@ public class ClientGUI implements ClientIF, ActionListener, DocumentListener, It
 		frame.setLocationRelativeTo(null);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.setVisible(true);
-		frmLoading.setVisible(true);
+		//frmLoading.setVisible(true);
 
 		//Display the calendar
 		clear();
 		
+		/*
 		try 
 	    {
 	      client = new ScheduleGeneratorClient(host, port, this);
@@ -147,8 +150,8 @@ public class ClientGUI implements ClientIF, ActionListener, DocumentListener, It
 	    {
 	      display("Error: Can't setup connection!"
 	                + " Terminating program.");
-	      System.exit(1);
-	    }
+	      //System.exit(1);
+	    }*/
 	}
 
 	private void addListeners() {
@@ -175,7 +178,7 @@ public class ClientGUI implements ClientIF, ActionListener, DocumentListener, It
 		txtSearch.addActionListener(this);
 		
 		//ComboBoxes
-		cboSemester.addItemListener(this);
+		//cboSemester.addItemListener(this);
 		cboSortOrder.addItemListener(this);
 		
 		//Checkboxes
@@ -194,7 +197,7 @@ public class ClientGUI implements ClientIF, ActionListener, DocumentListener, It
 		lstSearchResults.getActionMap().put("pressed", pressedAction);
 		
 		lstCourses.getInputMap().put(KeyStroke.getKeyStroke("DELETE"), "delete");
-		lstOptionalCourses.getInputMap().put(KeyStroke.getKeyStroke("DELETE"), "delete");
+	//	lstOptionalCourses.getInputMap().put(KeyStroke.getKeyStroke("DELETE"), "delete");
 		Action deleteAction = new AbstractAction() {
 			public void actionPerformed(ActionEvent e) {
 				if (lstCourses.hasFocus() || lstOptionalCourses.hasFocus()) {
@@ -203,16 +206,16 @@ public class ClientGUI implements ClientIF, ActionListener, DocumentListener, It
 			}
 		};
 		lstCourses.getActionMap().put("delete", deleteAction);
-		lstOptionalCourses.getActionMap().put("delete", deleteAction);
+		//lstOptionalCourses.getActionMap().put("delete", deleteAction);
 
 		
 		lstSearchResults.addMouseListener(this);
 		
 		lstCourses.addMouseListener(this);
-		lstOptionalCourses.addMouseListener(this);
+		//lstOptionalCourses.addMouseListener(this);
 		
 		lstCourses.addListSelectionListener(this);
-		lstOptionalCourses.addListSelectionListener(this);
+		//lstOptionalCourses.addListSelectionListener(this);
 	}
 
 	private void createComponents() {
@@ -228,28 +231,7 @@ public class ClientGUI implements ClientIF, ActionListener, DocumentListener, It
 		paneRightSideBar.setLayout(new BoxLayout(paneRightSideBar, BoxLayout.Y_AXIS));
 		GridBagConstraints c; //For using the gridbag layout.
 		
-		/*
-		 * Creating the semester selector. This is the first thing the user should do.
-		 */
-		paneSemester = new JPanel();
-		paneSemester.setLayout(new GridBagLayout());
-		paneSemester.setBorder(BorderFactory.createTitledBorder("Select Semester"));
-		lblSemester = new JLabel("Semester:");
-		cboSemester = new JComboBox<String>();
-		
-		c = new GridBagConstraints();
-		c.fill = GridBagConstraints.HORIZONTAL;
-		c.weightx = 0.5;
-		c.weighty = 0.5;
-		c.gridheight = 1;
-		c.gridwidth = 1;
-		c.gridx = 0;
-		c.gridy = 0;
-		paneSemester.add(lblSemester, c);
-		c.gridx = 1;
-		c.gridy = 0;
-		paneSemester.add(cboSemester, c);
-		
+				
 		/*
 		 * Creating the search pane.
 		 * Search for course code: [       ]
@@ -258,11 +240,12 @@ public class ClientGUI implements ClientIF, ActionListener, DocumentListener, It
 		 * |
 		 * |
 		 * |-------------------------------|
-		 * [ ] Optional?  [  ADD SELECTED  ]
-		 */
+		 * [ NEW ] [ EDIT ] [ DELETE ] [ ADD ]
+		 */		
+		
 		paneSearch = new JPanel();
 		paneSearch.setLayout(new GridBagLayout());
-		paneSearch.setBorder(BorderFactory.createTitledBorder("Add Courses"));
+		paneSearch.setBorder(BorderFactory.createTitledBorder("Course Library"));
 		c = new GridBagConstraints();
 		//Create search label.
 		lblSearch = new JLabel("Enter Course Code:");
@@ -277,34 +260,35 @@ public class ClientGUI implements ClientIF, ActionListener, DocumentListener, It
 		//We'll now have the option to add optional.
 		chkOptional = new JCheckBox("Optional?");
 		//Button to add, finally.
-		btnAdd = new JButton("Add Selected Course");
+		btnNew = new JButton("New");
+		btnEdit = new JButton("Edit");
+		btnDelete = new JButton("Delete");
+		btnAdd = new JButton("Add");
 		//Add components to pane
 		c.fill = GridBagConstraints.CENTER;
 		c.weightx = 0.5;
 		c.weighty = 0.5;
-		c.gridheight = 1;
-		c.gridwidth = 1;
 		c.gridx = 0;
-		c.gridy = 0;
-		paneSearch.add(lblSearch, c);
+		c.gridy = 1; //chkOptional is even lower.
 		c.fill = GridBagConstraints.HORIZONTAL;
-		c.gridx = 1; //Move one over and place text box.
-		c.gridy = 0;
-		paneSearch.add(txtSearch, c);
-		c.gridx = 0;
-		c.gridy = 1; //Place search results below.
-		c.gridwidth = 2;
-		paneSearch.add(scrSearchResults, c);
-		c.gridx = 0;
-		c.gridy = 2; //chkOptional is even lower.
-		c.gridwidth = 1;
-		c.fill = GridBagConstraints.CENTER;
-		paneSearch.add(chkOptional, c);
+		paneSearch.add(btnNew, c);
 		c.gridx = 1;
-		c.gridy = 2; //And add button is the the right of optional.
+		c.gridy = 1; //And add button is the the right of optional.
+		c.fill = GridBagConstraints.HORIZONTAL;
+		paneSearch.add(btnEdit, c);
+		c.gridx = 2;
+		c.gridy = 1; //And add button is the the right of optional.
+		c.fill = GridBagConstraints.HORIZONTAL;
+		paneSearch.add(btnDelete, c);
+		c.gridx = 3;
+		c.gridy = 1; //And add button is the the right of optional.
 		c.fill = GridBagConstraints.HORIZONTAL;
 		paneSearch.add(btnAdd, c);
-		
+		c.gridx = 0;
+		c.gridy = 0; //Place search results below.
+		c.gridwidth = 4;
+		paneSearch.add(scrSearchResults, c);
+
 		
 		/*
 		 * Creating the selected courses list panes
@@ -316,53 +300,34 @@ public class ClientGUI implements ClientIF, ActionListener, DocumentListener, It
 		
 		//Create labels
 		lblCourses = new JLabel("Mandatory Courses:");
-		lblOptionalCourses = new JLabel("Optional Courses:");
 		
 		//Create lists and scroll panes
 		lstCourses = new JList<String>();
-		lstOptionalCourses = new JList<String>();
 		lstCourses.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-		lstOptionalCourses.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		lstCourses.setPrototypeCellValue("Prototype Cell Value");
-		lstOptionalCourses.setPrototypeCellValue("Prototype Cell Value");
 		lstCourses.setVisibleRowCount(LIST_ROWS);
-		lstOptionalCourses.setVisibleRowCount(LIST_ROWS);
 		
 		scrCourses = new JScrollPane(lstCourses);
-		scrOptionalCourses = new JScrollPane(lstOptionalCourses);
 		
 		//Create remove and clear button
 		btnRemove = new JButton("Remove");
 		btnClearAll = new JButton("Clear");
-		btnEdit = new JButton("Edit");
 		
 		c.fill = GridBagConstraints.HORIZONTAL;
 		c.weightx = 0.5;
 		c.weighty = 0.5;
 		c.gridheight = 1;
-		c.gridwidth = 3;
+		c.gridwidth = 1;
+		c.gridx = 2;
+		c.gridy = 1;
+		paneList.add(btnRemove, c);
+		c.gridx = 3;
+		c.gridy = 1;
+		paneList.add(btnClearAll, c);
 		c.gridx = 0;
 		c.gridy = 0;
-		paneList.add(lblCourses, c);
-		c.gridx = 0;
-		c.gridy = 1;
+		c.gridwidth = 4;
 		paneList.add(scrCourses, c);
-		c.gridx = 0;
-		c.gridy = 2;
-		paneList.add(lblOptionalCourses, c);
-		c.gridx = 0;
-		c.gridy = 3;
-		paneList.add(scrOptionalCourses, c);
-		c.gridx = 0;
-		c.gridy = 4;
-		c.gridwidth = 1;
-		paneList.add(btnClearAll, c);
-		c.gridx = 1;
-		c.gridy = 4;
-		paneList.add(btnRemove, c);
-		c.gridx = 2;
-		c.gridy = 4;
-		paneList.add(btnEdit, c);
 		
 		/*
 		 * Create options pane
@@ -471,7 +436,6 @@ public class ClientGUI implements ClientIF, ActionListener, DocumentListener, It
 		/*
 		 * Adding all panes to main layout.
 		 */
-		paneLeftSideBar.add(paneSemester);
 		paneLeftSideBar.add(paneSearch);
 		paneLeftSideBar.add(paneList);
 		paneLeftSideBar.add(paneOptions);
@@ -500,10 +464,10 @@ public class ClientGUI implements ClientIF, ActionListener, DocumentListener, It
 	 	dimLoading.width = 260;
 		barLoading.setPreferredSize(dimLoading);
 		
-		statusPanel.add(Box.createHorizontalStrut(10)); //space for the progress bar.
+		//statusPanel.add(Box.createHorizontalStrut(10)); //space for the progress bar.
 		statusPanel.add(barLoading);
 		statusPanel.add(statusLabel);
-		statusPanel.add(btnCourseSequences);
+		//statusPanel.add(btnCourseSequences);
 		
 		
 
@@ -533,7 +497,7 @@ public class ClientGUI implements ClientIF, ActionListener, DocumentListener, It
 			i++;
 		}
 		g.setColor(Color.BLACK);
-		String time = new String("22:00");
+		String time = new String("21:00");
 		g.drawString(time, (int)(0.5*DAY-DAY_MARGIN), HALF_HOUR*28-HALF_HOUR_MARGIN+(int)(fntMain.getSize()/2));
 		g.drawLine(DAY-DAY_MARGIN, HALF_HOUR*(28)-HALF_HOUR_MARGIN, DAY*8-DAY_MARGIN, HALF_HOUR*(28)-HALF_HOUR_MARGIN);
 		
